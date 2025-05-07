@@ -1,0 +1,41 @@
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+img2 = cv2.imread('circulos_1.png')
+img = cv2.imread('circulos_1.png', cv2.IMREAD_GRAYSCALE)
+
+img_mediana = cv2.medianBlur(img, 5) 
+
+kernel = np.ones((5,5),np.uint8)
+grey = cv2.GaussianBlur(img,(9,9),0)
+grey = cv2.morphologyEx(grey, cv2.MORPH_OPEN, kernel)
+grey = cv2.morphologyEx(grey, cv2.MORPH_CLOSE, kernel)
+plt.imshow(grey,cmap="gray")
+plt.show()
+
+circles = cv2.HoughCircles(grey,
+                          cv2.HOUGH_GRADIENT,
+                          dp=1.3,
+                          minDist=100,
+                          param1=200,
+                          param2=40,
+                          minRadius=50,
+                          maxRadius=420)
+
+circles = np.uint16(np.around(circles))
+cimg = img2.copy()
+for i in circles[0,:]:
+    # draw the outer circle
+    cv2.circle(cimg,(i[0],i[1]),i[2],(0,255,0),2)
+    # draw the center of the circle
+    cv2.circle(cimg,(i[0],i[1]),2,(255,0,0),10)
+
+if circles is not None:
+    total = circles.shape[1]
+else:
+    total = 0
+
+plt.imshow(cimg)
+plt.title(f'Circulos detectados: {(total)} - Sobel')
+plt.axis('off')
